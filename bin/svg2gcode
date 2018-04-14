@@ -39,24 +39,23 @@ if(program.positive) {
   }
 }
 
-
-function run(file) {
-  var svg = ''+fs.readFileSync(file);
-  canvg(gctx.canvas, svg);
-  console.log('M30');
-}
-
-if(program.args.length === 0 && process.stdin.isTTY) {
-  program.outputHelp();
-  process.exit(0);
-}
 if(!process.stdin.isTTY) {
-  run('/dev/stdin');
-}
+  let svg = []
+  const stdin = process.stdin
+  stdin.resume()
+  stdin.setEncoding('utf8')
+  
+  stdin.on('data', data => {
+    svg.push(data)
+  })
 
-program.args.forEach(function(file) {
-  run(file);
-});
+  stdin.on('end', () => {
+    svg = svg.join().trim()
+    canvg(gctx.canvas, svg)
+    console.log('M30')
+    process.exit(0)
+  })
+}
 
 if(program.top > 0) {
   gctx.motion.rapid({z:0});
@@ -64,6 +63,3 @@ if(program.top > 0) {
 else {
   gctx.motion.retract();
 }
-
-
-// process.exit(0);
